@@ -1,9 +1,10 @@
 library(shiny)
 library(koRpus)
+library(koRpus.lang.en)
 
 shinyServer(function(input, output){
 
-	tagged.text <- reactive(tokenize(input$text, format="obj", lang="en"))
+	tagged.text <- reactive(koRpus:::tokenize(input$text, format="obj", lang="en"))
 	hyphenated.text <- reactive({
 			# set the next line to activate caching, if this application is run on a shiny server
 			#set.kRp.env(hyph.cache.file=file.path("/var","shiny-server","cache","koRpus",paste("hyph.cache.",input$lang,".rdata", sep="")))
@@ -54,6 +55,9 @@ shinyServer(function(input, output){
 	RD.results <- reactive(readability(tagged.text(), hyphen=hyphenated.text(), index=input$RD.indices, quiet=TRUE))
 	output$readability.sum <- renderTable({
 		summary(RD.results())
+	})
+	output$readability.score <- renderPrint({
+	  readability(tagged.text(), hyphen=hyphenated.text(), index='SMOG.simple', quiet=TRUE)
 	})
 	output$readability.res <- renderPrint({
 		RD.results()

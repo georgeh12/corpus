@@ -1,0 +1,10 @@
+name: corpus
+title: corpus
+username: readability
+account: readability
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11205624
+bundleId: 8248333
+url: https://readability.shinyapps.io/corpus/
+version: 1
