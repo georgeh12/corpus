@@ -7,23 +7,20 @@ shinyServer(function(input, output){
 
 	tagged.text <- reactive(koRpus:::tokenize(input$text, format="obj", lang="en"))
 	hyphenated.text <- reactive({
-			# set the next line to activate caching, if this application is run on a shiny server
-			#set.kRp.env(hyph.cache.file=file.path("/var","shiny-server","cache","koRpus",paste("hyph.cache.",input$lang,".rdata", sep="")))
-			hyphen(tagged.text(), quiet=TRUE)
-		})
+		# set the next line to activate caching, if this application is run on a shiny server
+		#set.kRp.env(hyph.cache.file=file.path("/var","shiny-server","cache","koRpus",paste("hyph.cache.",input$lang,".rdata", sep="")))
+		hyphen(tagged.text(), quiet=TRUE)
+	})
     
-    output$word.list <- renderTable({
-        x <- input$text
-        x <- tolower(x)
-        words <- unlist (strsplit (x, split = "[[:space:]]+|[[:punct:]]+"))
-        Word <- words[words !=""]
-        Word.freq <- as.data.frame(table (Word))
-        Word.sorted <- Word.freq[order(Word.freq$Freq, decreasing = TRUE), ]
-        return(Word.sorted)
-    })
-    #output$word.list <- renderPrint({
-    #word.list()
-    #})
+  output$word.list <- renderTable({
+    x <- input$text
+    x <- tolower(x)
+    words <- unlist (strsplit (x, split = "[[:space:]]+|[[:punct:]]+"))
+    Word <- words[words !=""]
+    Word.freq <- as.data.frame(table (Word))
+    Word.sorted <- Word.freq[order(Word.freq$Freq, decreasing = TRUE), ]
+    return(Word.sorted)
+  })
     
 	output$letter.plot <- renderPlot(plot(tagged.text(), what="letters"))
 	output$desc <- renderTable({
@@ -58,50 +55,51 @@ shinyServer(function(input, output){
 		summary(RD.results())
 	})
 	output$readability.score <- renderText({
-	  # ChatGPT Desert Island
-	  TextCompare1 = "
-      Pros:
-      1. Tranquility: Living on a desert island can offer unparalleled peace and solitude, providing a break from the hustle and bustle of modern life.
-      2. Connection with Nature: A desert island allows for a deep connection with nature, with the opportunity to appreciate and live in harmony with the environment.
-      
-      Cons:
-      1. Isolation: The lack of human interaction and limited access to amenities can lead to feelings of isolation and loneliness.
-      2. Survival Challenges: Obtaining basic necessities such as food, water, and shelter can be challenging, requiring resourcefulness and adaptation to the harsh conditions of the island.
-    "
-	  # ChatGPT Social Media
-	  TextCompare2 = "
-      Pros of Social Media:
-      Connectivity: Enables instant communication and connection with friends, family, and a global network.
-      Information Sharing: Facilitates the rapid dissemination of news, trends, and information.
+	  try({
+  	  # ChatGPT Desert Island
+  	  TextCompare1 = "
+        Pros:
+        1. Tranquility: Living on a desert island can offer unparalleled peace and solitude, providing a break from the hustle and bustle of modern life.
+        2. Connection with Nature: A desert island allows for a deep connection with nature, with the opportunity to appreciate and live in harmony with the environment.
+        
+        Cons:
+        1. Isolation: The lack of human interaction and limited access to amenities can lead to feelings of isolation and loneliness.
+        2. Survival Challenges: Obtaining basic necessities such as food, water, and shelter can be challenging, requiring resourcefulness and adaptation to the harsh conditions of the island.
+      "
+  	  # ChatGPT Social Media
+  	  TextCompare2 = "
+        Pros of Social Media:
+        Connectivity: Enables instant communication and connection with friends, family, and a global network.
+        Information Sharing: Facilitates the rapid dissemination of news, trends, and information.
+    	  
+        Cons of Social Media:
+        Privacy Concerns: Raises issues regarding the protection of personal information and privacy.
+        Misinformation: Provides a platform for the spread of false information and rumors.
+  	  "
+  	  similarity1 <- jaccard_similarity(textreuse::tokenize_words(TextCompare1), textreuse::tokenize_words(input$text))
+  	  similarity2 <- jaccard_similarity(textreuse::tokenize_words(TextCompare2), textreuse::tokenize_words(input$text))
   	  
-      Cons of Social Media:
-      Privacy Concerns: Raises issues regarding the protection of personal information and privacy.
-      Misinformation: Provides a platform for the spread of false information and rumors.
-	  "
-	  similarity1 <- jaccard_similarity(textreuse::tokenize_words(TextCompare1), textreuse::tokenize_words(input$text))
-	  similarity2 <- jaccard_similarity(textreuse::tokenize_words(TextCompare2), textreuse::tokenize_words(input$text))
-	  
-	  readability.test <- readability(tagged.text(), hyphen=hyphenated.text(), index=c("ARI","SMOG","Linsear.Write"), quiet=TRUE)
-	  numUniqueWords <- {
-	    text <- tolower(input$text)
-      words <- unlist (strsplit (text, split = "[[:space:]]+|[[:punct:]]+"))
-      words <- words[words !=""]
-      uniqueWords = table(words)
-      length(uniqueWords)
-	  }
-	  toupper(
-	    if(numUniqueWords > 50 &
+  	  readability.test <- readability(tagged.text(), hyphen=hyphenated.text(), index=c("ARI","SMOG","Linsear.Write"), quiet=TRUE)
+  	  numUniqueWords <- {
+  	    text <- tolower(input$text)
+        words <- unlist (strsplit (text, split = "[[:space:]]+|[[:punct:]]+"))
+        words <- words[words !=""]
+        uniqueWords = table(words)
+        length(uniqueWords)
+  	  }
+  	  
+	    #ChatGPT has 35 unique words in the answer minus the headers
+	    if(numUniqueWords >= 35 &
 	       # ChatGPT answer has a Linsear-Write grade of 3.6
 	       readability.test@Linsear.Write$grade > 3.6 &
 	       readability.test@ARI$grade > 6 &
 	       readability.test@SMOG$grade > 6 &
 	       similarity1 < .5 &
 	       similarity2 < .5){
-  	    'exceptional'
-  	  } else{
-  	    'pass'
+	      return(toupper('win'))
   	  }
-	  )
+	  })
+	  return(toupper('pass'))
 	})
 	output$similarity.list <- renderTable({
 	  # ChatGPT Desert Island
