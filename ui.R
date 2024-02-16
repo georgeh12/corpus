@@ -126,7 +126,8 @@ shinyUI(
 					plotOutput("letter.plot")
 				),
         tabPanel("Word list",
-            tableOutput("word.list")
+          h5(verbatimTextOutput("word.list.unique")),
+          tableOutput("word.list")
         ),
 				tabPanel("Lexical diversity",
 					h5("Summary"),

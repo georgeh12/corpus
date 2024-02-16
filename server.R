@@ -19,8 +19,10 @@ shinyServer(function(input, output){
     Word <- words[words !=""]
     Word.freq <- as.data.frame(table (Word))
     Word.sorted <- Word.freq[order(Word.freq$Freq, decreasing = TRUE), ]
+    output$word.list.unique <- renderText(paste("Unique words: ", nrow(Word.sorted)))
     return(Word.sorted)
   })
+  
     
 	output$letter.plot <- renderPlot(plot(tagged.text(), what="letters"))
 	output$desc <- renderTable({
