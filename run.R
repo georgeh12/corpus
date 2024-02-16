@@ -15,9 +15,11 @@ runApp()
 # pr("plumber.R") %>%
 #   pr_run(port=80)
 
+mysecret <- readLines("secret.txt")
+mytoken <- readLines("token.txt")
 install.packages('rsconnect')
 library(rsconnect)
 rsconnect::setAccountInfo(name='readability',
-                          token='6A512DAA0FD5FC0399E04DA4BA38DB5D',
-                          secret='nmv0B+Zsas+JoRazNaB95yR1vMUFYS7dnHENpmlM')
+                          token=mytoken,
+                          secret=mysecret)
 rsconnect::deployApp('./')

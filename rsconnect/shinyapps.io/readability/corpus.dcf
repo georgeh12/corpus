@@ -5,6 +5,6 @@ account: readability
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11205624
-bundleId: 8265217
+bundleId: 8265229
 url: https://readability.shinyapps.io/corpus/
 version: 1
