@@ -90,7 +90,7 @@ shinyServer(function(input, output){
         length(uniqueWords)
   	  }
   	  
-	    if(numUniqueWords >= 50 &
+	    if(numUniqueWords >= 40 &
 	       # ChatGPT answer has a Linsear-Write grade of 3.6
 	       readability.test@Linsear.Write$grade > 3.6 &
 	       readability.test@ARI$grade > 6 &
